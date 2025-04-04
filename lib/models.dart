@@ -1,6 +1,13 @@
-class Collection {
-  String name;
-  List<String> cards;
+import 'logic/stack_logic.dart';
 
-  Collection({required this.name, required this.cards});
+class Collection {
+  final String name;
+  final List<String> cards;
+  List<CardStack> stackedCards;
+
+  Collection({
+    required this.name,
+    this.cards = const [],
+    List<CardStack>? stackedCards,
+  }) : stackedCards = stackedCards ?? [];
 }

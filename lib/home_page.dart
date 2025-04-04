@@ -1,16 +1,28 @@
 import 'package:flutter/material.dart';
 import 'inventory_page.dart';
+import 'theme/app_colors.dart';
 
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: Center(
         child: ElevatedButton(
-          child: Text('Bem-vindo! Clique para prosseguir'),
-          onPressed: () => Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => InventoryPage()),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => InventoryPage()),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            padding: EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+            shape: StadiumBorder(),
+          ),
+          child: Text(
+            'Bem-vindo! Clique para prosseguir',
+            style: TextStyle(color: Colors.white),
           ),
         ),
       ),

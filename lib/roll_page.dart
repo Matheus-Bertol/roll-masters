@@ -1,5 +1,9 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'models.dart';
+import 'theme/app_colors.dart';
+import 'logic/stack_logic.dart';
+import 'logic/card_data_provider.dart';
 
 class RollPage extends StatefulWidget {
   final Collection collection;
@@ -12,12 +16,17 @@ class RollPage extends StatefulWidget {
 }
 
 class _RollPageState extends State<RollPage> {
-  String? newCard;
+  CardStack? newCard;
 
   void _rollCard() {
-    setState(() {
-      newCard = 'VOCÊ GANHOU UMA CARTA!';
-    });
+    final int maxAvailableCards = CardDataProvider.totalCards;
+    final int randomId = Random().nextInt(maxAvailableCards) + 1;
+
+    final selected = CardDataProvider.getCardDataById(randomId);
+    final id = selected['id']!;
+    final name = selected['name']!;
+
+    newCard = CardStack(id: id, name: name);
 
     showDialog(
       context: context,
@@ -25,10 +34,23 @@ class _RollPageState extends State<RollPage> {
       builder: (BuildContext context) {
         return Center(
           child: CardRevealWidget(
-            cardText: newCard!,
+            cardText: newCard!.name,
             onAdd: () {
+              print('newCard é: ${newCard?.name}');
               setState(() {
-                widget.collection.cards.add(newCard!);
+                final existing = widget.collection.stackedCards
+                    .firstWhere((c) => c.id == newCard!.id, orElse: () => CardStack(id: '', name: ''));
+
+                if (existing.id.isNotEmpty) {
+                  existing.quantity++;
+                } else {
+                  widget.collection.stackedCards.add(CardStack(
+                    id: newCard!.id,
+                    name: newCard!.name,
+                    quantity: 1,
+                  ));
+                }
+
                 newCard = null;
               });
               widget.onUpdate();
@@ -48,15 +70,26 @@ class _RollPageState extends State<RollPage> {
 
   @override
   Widget build(BuildContext context) {
-    final cards = widget.collection.cards;
+    final cards = widget.collection.stackedCards;
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.collection.name)),
+      appBar: AppBar(
+        title: Text(widget.collection.name),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(gradient: AppColors.gradient),
+        ),
+      ),
+      backgroundColor: AppColors.background,
       body: Column(
         children: [
           Expanded(
             child: cards.isEmpty
-                ? Center(child: Text('Nenhuma carta adicionada ainda.'))
+                ? Center(
+              child: Text(
+                'Nenhuma carta adicionada ainda.',
+                style: TextStyle(color: AppColors.text),
+              ),
+            )
                 : Padding(
               padding: const EdgeInsets.all(12.0),
               child: GridView.builder(
@@ -71,9 +104,17 @@ class _RollPageState extends State<RollPage> {
                   final card = cards[index];
                   return Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.red, width: 2),
+                      color: AppColors.cardBackground,
+                      border: Border.all(
+                          color: AppColors.cardBorder, width: 1.5),
                       borderRadius: BorderRadius.circular(12),
-                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.15),
+                          offset: Offset(0, 2),
+                          blurRadius: 6,
+                        )
+                      ],
                     ),
                     padding: EdgeInsets.all(8),
                     child: Column(
@@ -82,62 +123,78 @@ class _RollPageState extends State<RollPage> {
                         Expanded(
                           child: Center(
                             child: Text(
-                              'Carta',
-                              style: TextStyle(fontSize: 16, color: Colors.red),
+                              '${card.name} (${card.quantity}x)',
+                              style: TextStyle(
+                                  fontSize: 16, color: AppColors.text),
                               textAlign: TextAlign.center,
                             ),
                           ),
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.remove_red_eye, color: Colors.grey),
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: Text('Carta'),
-                                    content: Text(card),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: Text('Fechar'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: Text('Descartar carta?'),
-                                    content: Text('Tem certeza que deseja descartar esta carta?'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: Text('Cancelar'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            widget.collection.cards.removeAt(index);
+                        FittedBox(
+                          child: Row(
+                            mainAxisAlignment:
+                            MainAxisAlignment.spaceAround,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.remove_red_eye,
+                                    color: AppColors.accent),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Text(card.name),
+                                      content: Text(
+                                          'Quantidade: ${card.quantity}'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                          child: Text('Fechar'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.delete,
+                                    color: AppColors.accent),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Text('Descartar carta?'),
+                                      content: Text(
+                                          'Deseja remover uma cópia desta carta?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                          child: Text('Cancelar'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              if (card.quantity > 1) {
+                                                card.quantity--;
+                                              } else {
+                                                widget.collection
+                                                    .stackedCards
+                                                    .removeAt(index);
+                                              }
+                                            });
                                             widget.onUpdate();
-                                          });
-                                          Navigator.pop(context);
-                                        },
-                                        child: Text('Descartar'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
+                                            Navigator.pop(context);
+                                          },
+                                          child: Text('Descartar'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -151,10 +208,11 @@ class _RollPageState extends State<RollPage> {
             child: ElevatedButton(
               onPressed: _rollCard,
               style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
                 padding: EdgeInsets.symmetric(horizontal: 40, vertical: 16),
                 shape: StadiumBorder(),
               ),
-              child: Text('Roll'),
+              child: Text('Roll', style: TextStyle(color: Colors.white)),
             ),
           ),
         ],
@@ -183,9 +241,16 @@ class CardRevealWidget extends StatelessWidget {
           margin: EdgeInsets.symmetric(horizontal: 24),
           padding: EdgeInsets.all(32),
           decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: Colors.red, width: 3),
+            color: AppColors.cardBackground,
+            border: Border.all(color: AppColors.cardBorder, width: 2),
             borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                offset: Offset(0, 2),
+                blurRadius: 6,
+              )
+            ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -193,7 +258,7 @@ class CardRevealWidget extends StatelessWidget {
               Text(
                 cardText,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 20, color: Colors.red),
+                style: TextStyle(fontSize: 20, color: AppColors.text),
               ),
               SizedBox(height: 24),
               Row(
@@ -202,19 +267,24 @@ class CardRevealWidget extends StatelessWidget {
                   ElevatedButton(
                     onPressed: onAdd,
                     style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      backgroundColor: AppColors.primary,
+                      padding:
+                      EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       shape: StadiumBorder(),
                     ),
-                    child: Text('Adicionar'),
+                    child:
+                    Text('Adicionar', style: TextStyle(color: Colors.white)),
                   ),
                   ElevatedButton(
                     onPressed: onDiscard,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey,
-                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      backgroundColor: AppColors.secondaryRed,
+                      padding:
+                      EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       shape: StadiumBorder(),
                     ),
-                    child: Text('Descartar'),
+                    child:
+                    Text('Descartar', style: TextStyle(color: Colors.white)),
                   ),
                 ],
               )

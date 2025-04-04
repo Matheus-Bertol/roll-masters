@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'models.dart';
 import 'roll_page.dart';
+import 'theme/app_colors.dart';
 
 class InventoryPage extends StatefulWidget {
   @override
@@ -14,7 +15,7 @@ class _InventoryPageState extends State<InventoryPage> {
     String? name = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Criar nova coleção'),
+        title: Text('Criar nova coleção', style: TextStyle(color: AppColors.text)),
         content: TextField(
           autofocus: true,
           decoration: InputDecoration(hintText: 'Nome da coleção'),
@@ -24,27 +25,36 @@ class _InventoryPageState extends State<InventoryPage> {
     );
 
     if (name != null && name.isNotEmpty) {
-      setState(() => collections.add(Collection(name: name, cards: [])));
+      setState(() => collections.add(Collection(name: name, cards: [], stackedCards: [])));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Minhas Coleções')),
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: Text('Minhas Coleções'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(gradient: AppColors.gradient),
+        ),
+      ),
       body: ListView.builder(
         itemCount: collections.length,
         itemBuilder: (context, index) {
           final collection = collections[index];
           return ListTile(
-            title: Text(collection.name),
-            subtitle: Text('${collection.cards.length} cartas'),
+            title: Text(collection.name, style: TextStyle(color: AppColors.text)),
+            subtitle: Text(
+              '${collection.stackedCards.fold<int>(0, (total, c) => total + c.quantity)} cartas',
+              style: TextStyle(color: AppColors.text.withOpacity(0.7)),
+            ),
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (_) => RollPage(
                   collection: collection,
-                  onUpdate: () => setState(() {}), // força a atualização da lista
+                  onUpdate: () => setState(() {}),
                 ),
               ),
             ),
@@ -53,8 +63,8 @@ class _InventoryPageState extends State<InventoryPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addCollection,
-        child: Icon(Icons.add),
-        tooltip: 'Criar coleção',
+        backgroundColor: AppColors.primary,
+        child: Icon(Icons.add, color: Colors.white),
       ),
     );
   }
