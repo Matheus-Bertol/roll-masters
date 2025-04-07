@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'models.dart';
 import 'theme/app_colors.dart';
@@ -9,9 +10,10 @@ class RollPage extends StatefulWidget {
   final Collection collection;
   final VoidCallback onUpdate;
 
-  RollPage({required this.collection, required this.onUpdate});
+  const RollPage({super.key, required this.collection, required this.onUpdate});
 
   @override
+  // ignore: library_private_types_in_public_api
   _RollPageState createState() => _RollPageState();
 }
 
@@ -36,7 +38,9 @@ class _RollPageState extends State<RollPage> {
           child: CardRevealWidget(
             cardText: newCard!.name,
             onAdd: () {
-              print('newCard é: ${newCard?.name}');
+              if (kDebugMode) {
+                print('newCard é: ${newCard?.name}');
+              }
               setState(() {
                 final existing = widget.collection.stackedCards
                     .firstWhere((c) => c.id == newCard!.id, orElse: () => CardStack(id: '', name: ''));
@@ -110,6 +114,7 @@ class _RollPageState extends State<RollPage> {
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
+                          // ignore: deprecated_member_use
                           color: Colors.black.withOpacity(0.15),
                           offset: Offset(0, 2),
                           blurRadius: 6,
@@ -226,7 +231,7 @@ class CardRevealWidget extends StatelessWidget {
   final VoidCallback onAdd;
   final VoidCallback onDiscard;
 
-  const CardRevealWidget({
+  const CardRevealWidget({super.key, 
     required this.cardText,
     required this.onAdd,
     required this.onDiscard,
@@ -246,7 +251,7 @@ class CardRevealWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.15),
+                color: Colors.black.withAlpha((0.15 * 255).toInt()),
                 offset: Offset(0, 2),
                 blurRadius: 6,
               )

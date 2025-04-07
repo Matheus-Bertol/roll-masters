@@ -7,6 +7,8 @@ void main() {
 }
 
 class RollMastersApp extends StatelessWidget {
+  const RollMastersApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

@@ -6,13 +6,13 @@ class RollPage extends StatefulWidget {
   final Collection collection;
   final VoidCallback onUpdate;
 
-  RollPage({required this.collection, required this.onUpdate});
+  const RollPage({super.key, required this.collection, required this.onUpdate});
 
   @override
-  _RollPageState createState() => _RollPageState();
+  RollPageState createState() => RollPageState();
 }
 
-class _RollPageState extends State<RollPage> {
+class RollPageState extends State<RollPage> {
   String? newCard;
 
   void _rollCard() {
@@ -62,110 +62,139 @@ class _RollPageState extends State<RollPage> {
       body: Column(
         children: [
           Expanded(
-            child: cards.isEmpty
-                ? Center(
-              child: Text(
-                'Nenhuma carta adicionada ainda.',
-                style: TextStyle(color: AppColors.text),
-              ),
-            )
-                : Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 3 / 4,
-                ),
-                itemCount: cards.length,
-                itemBuilder: (context, index) {
-                  final card = cards[index];
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.cardBackground,
-                      border: Border.all(color: AppColors.cardBorder, width: 1.5),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
-                          offset: Offset(0, 2),
-                          blurRadius: 6,
-                        )
-                      ],
-                    ),
-                    padding: EdgeInsets.all(8),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Center(
-                            child: Text(
-                              'Carta',
-                              style: TextStyle(fontSize: 16, color: AppColors.text),
-                              textAlign: TextAlign.center,
+            child:
+                cards.isEmpty
+                    ? Center(
+                      child: Text(
+                        'Nenhuma carta adicionada ainda.',
+                        style: TextStyle(color: AppColors.text),
+                      ),
+                    )
+                    : Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                          childAspectRatio: 3 / 4,
+                        ),
+                        itemCount: cards.length,
+                        itemBuilder: (context, index) {
+                          final card = cards[index];
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: AppColors.cardBackground,
+                              border: Border.all(
+                                color: AppColors.cardBorder,
+                                width: 1.5,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Color.fromRGBO(0, 0, 0, 0.15),
+                                  offset: Offset(0, 2),
+                                  blurRadius: 6,
+                                ),
+                              ],
                             ),
-                          ),
-                        ),
-                        FittedBox(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              IconButton(
-                                icon: Icon(Icons.remove_red_eye, color: AppColors.accent),
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: Text('Carta'),
-                                      content: Text(card),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(context),
-                                          child: Text('Fechar'),
-                                        ),
-                                      ],
+                            padding: EdgeInsets.all(8),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Center(
+                                    child: Text(
+                                      'Carta',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: AppColors.text,
+                                      ),
+                                      textAlign: TextAlign.center,
                                     ),
-                                  );
-                                },
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.delete, color: AppColors.accent),
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: Text('Descartar carta?'),
-                                      content: Text('Tem certeza que deseja descartar esta carta?'),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(context),
-                                          child: Text('Cancelar'),
+                                  ),
+                                ),
+                                FittedBox(
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      IconButton(
+                                        icon: Icon(
+                                          Icons.remove_red_eye,
+                                          color: AppColors.accent,
                                         ),
-                                        TextButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              widget.collection.cards.removeAt(index);
-                                              widget.onUpdate();
-                                            });
-                                            Navigator.pop(context);
-                                          },
-                                          child: Text('Descartar'),
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder:
+                                                (context) => AlertDialog(
+                                                  title: Text('Carta'),
+                                                  content: Text(card),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed:
+                                                          () => Navigator.pop(
+                                                            context,
+                                                          ),
+                                                      child: Text('Fechar'),
+                                                    ),
+                                                  ],
+                                                ),
+                                          );
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: Icon(
+                                          Icons.delete,
+                                          color: AppColors.accent,
                                         ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder:
+                                                (context) => AlertDialog(
+                                                  title: Text(
+                                                    'Descartar carta?',
+                                                  ),
+                                                  content: Text(
+                                                    'Tem certeza que deseja descartar esta carta?',
+                                                  ),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed:
+                                                          () => Navigator.pop(
+                                                            context,
+                                                          ),
+                                                      child: Text('Cancelar'),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        setState(() {
+                                                          widget
+                                                              .collection
+                                                              .cards
+                                                              .removeAt(index);
+                                                          widget.onUpdate();
+                                                        });
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child: Text('Descartar'),
+                                                    ),
+                                                  ],
+                                                ),
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                  );
-                },
-              ),
-            ),
           ),
           Padding(
             padding: const EdgeInsets.only(bottom: 32.0),
@@ -191,6 +220,7 @@ class CardRevealWidget extends StatelessWidget {
   final VoidCallback onDiscard;
 
   const CardRevealWidget({
+    super.key,
     required this.cardText,
     required this.onAdd,
     required this.onDiscard,
@@ -210,10 +240,10 @@ class CardRevealWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.15),
+                color: Color.fromRGBO(0, 0, 0, 0.15),
                 offset: Offset(0, 2),
                 blurRadius: 6,
-              )
+              ),
             ],
           ),
           child: Column(
@@ -232,22 +262,34 @@ class CardRevealWidget extends StatelessWidget {
                     onPressed: onAdd,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                       shape: StadiumBorder(),
                     ),
-                    child: Text('Adicionar', style: TextStyle(color: Colors.white)),
+                    child: Text(
+                      'Adicionar',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                   ElevatedButton(
                     onPressed: onDiscard,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.secondary,
-                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                       shape: StadiumBorder(),
                     ),
-                    child: Text('Descartar', style: TextStyle(color: Colors.white)),
+                    child: Text(
+                      'Descartar',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ),
